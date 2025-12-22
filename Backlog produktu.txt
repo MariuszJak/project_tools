@@ -1,0 +1,207 @@
+﻿EPIC 1 — Pozyskiwanie i przetwarzanie danych
+1.1 — OCR i ekstrakcja danych z PDF
+User Story:
+ Jako analityk danych chcę automatycznie przetwarzać pliki PDF z ofertami, aby system sam wyodrębniał tekst i dane strukturalne.
+________________
+
+
+1.2 — Normalizacja danych
+User Story:
+ Jako system chcę automatycznie czyścić i normalizować dane, aby wszystkie oferty miały spójny format.
+________________
+
+
+1.3 — Wykrywanie duplikatów
+User Story:
+ Jako użytkownik chcę, aby system automatycznie usuwał zduplikowane ogłoszenia, aby nie widzieć powtarzających się ofert.
+________________
+
+
+1.4 — Integracja z serwisami ogłoszeń
+User Story:
+ Jako administrator chcę umożliwić integrację API z popularnymi portalami ogłoszeniowymi, aby dane były aktualne.
+________________
+
+
+EPIC 2 — Baza danych i model danych
+EPIC 2: Baza danych i model danych
+* Dla 2.1 Struktura listingów:
+   * User Story: Jako developer chcę mieć zdefiniowaną główną tabelę listingów (ofert), aby przechowywać kluczowe dane, takie jak cena, metraż, tytuł i opis.
+* Dla 2.2 Tabela lokalizacji:
+   * User Story: Jako developer chcę mieć dedykowaną tabelę lokalizacji, aby móc powiązać oferty z danymi geograficznymi (miasto, dzielnica, ulica) i umożliwić filtrowanie po adresie.
+* Dla 2.3 Tabela właścicieli:
+   * User Story: Jako developer chcę mieć tabelę właścicieli lub agentów, aby móc powiązać oferty z konkretnymi podmiotami wystawiającymi.
+* Dla 2.4 Tabela budynków:
+   * User Story: Jako developer chcę mieć tabelę budynków, aby przechowywać szczegółowe dane techniczne powiązane z listingiem, takie jak rok budowy czy typ budynku.
+* Dla 2.5 Tabela udogodnień (features):
+   * User Story: Jako developer chcę mieć tabelę udogodnień (features) , aby elastycznie przypisywać atrybuty (np. garaż, balkon, piwnica) do ofert i wspierać filtry zaawansowane.
+Każdy story typu Jako developer chcę mieć tabelę X... można rozwinąć na requesty SQL, walidację, migracje DB.
+________________
+
+
+EPIC 3 — Wyszukiwanie semantyczne (RAG)
+3.1 — Semantyczna interpretacja zapytania
+User Story:
+ Jako użytkownik chcę wpisywać zapytania naturalnym językiem (np. „mieszkanie do 400 tys. na Bałutach z balkonem”), aby otrzymać dopasowane wyniki bez używania filtrów.
+________________
+
+
+3.2 — Mapowanie zapytania na pola bazy danych
+User Story:
+ Jako system chcę interpretować zapytania i zamieniać je na parametry (lokalizacja, cena, liczba pokoi itd.), aby trafnie przeszukiwać bazę.
+________________
+
+
+3.3 — Ranking semantyczny ofert
+User Story:
+ Jako użytkownik chcę, aby wyniki były uporządkowane wg dopasowania semantycznego.
+________________
+
+
+3.4 — Podpowiedzi zapytań (AI autocomplete)
+User Story:
+ Jako użytkownik chcę otrzymywać inteligentne podpowiedzi zapytań, aby szybciej znaleźć mieszkanie.
+________________
+
+
+EPIC 4 — Filtry i sortowanie
+Celem tego epiku jest dostarczenie użytkownikowi precyzyjnych narzędzi do przeszukiwania bazy danych listingów w sposób tradycyjny (parametryczny), stanowiący uzupełnienie dla wyszukiwania semantycznego (AI).
+4.1 — Filtry podstawowe (Szybki wybór)
+* User Story: Jako użytkownik chcę mieć możliwość filtrowania ofert po kluczowych parametrach (cena, metraż, lokalizacja, liczba pokoi), aby błyskawicznie odrzucić ogłoszenia poza moim budżetem lub wymaganiami przestrzennymi.
+* Kryteria akceptacji:
+   * Suwaki (range sliders) dla ceny całkowitej oraz ceny za $m^2$.
+   * Wybór wielokrotny (multi-select) dla liczby pokoi (np. 2 i 3 pokojowe jednocześnie).
+   * Autouzupełnianie w polu lokalizacji (miasto, dzielnica).
+   * Licznik wyników aktualizujący się dynamicznie po każdej zmianie filtra ("Pokaż 124 oferty").
+4.2 — Filtry zaawansowane (Techniczne)
+* User Story: Jako użytkownik szukający konkretnego standardu, chcę filtrować oferty według cech budynku i udogodnień (rok budowy, winda, garaż, ogrzewanie miejskie), aby znaleźć mieszkanie dopasowane do mojego stylu życia.
+* Kryteria akceptacji:
+   * Sekcja „Udogodnienia” z checkboxami (balkon, ogród, piwnica, parking).
+   * Filtr „Typ zabudowy” (blok, kamienica, apartamentowiec, dom).
+   * Filtr „Piętro” z opcją zaznaczenia „brak parteru” lub „ostatnie piętro”.
+   * Możliwość filtrowania po roku budowy (od – do).
+4.3 — Sortowanie wyników
+* User Story: Jako użytkownik chcę mieć możliwość zmiany kolejności wyświetlanych ofert, aby najpierw widzieć te najtańsze, najnowsze lub o najlepszym stosunku ceny do metrażu.
+* Kryteria akceptacji:
+   * Dostępne opcje sortowania:
+      * Cena (rosnąco/malejąco).
+      * Cena za $m^2$ (rosnąco/malejąco).
+      * Data dodania (najnowsze).
+      * Metraż (rosnąco/malejąco).
+   * Domyślne sortowanie ustawione na „Najtrafniejsze” (bazujące na algorytmie dopasowania).
+4.4 — Zapisywanie filtrów i alerty
+* User Story: Jako użytkownik chcę zapisać moje aktualne ustawienia filtrów jako „Wyszukiwanie”, aby system powiadomił mnie, gdy pojawi się nowa oferta spełniająca te kryteria.
+* Kryteria akceptacji:
+   * Przycisk „Zapisz wyszukiwanie” dostępny nad wynikami.
+   * Możliwość nazwania zapisanego filtru (np. „Moje wymarzone na Bałutach”).
+   * Integracja z systemem powiadomień (Epic 10).
+________________
+
+
+EPIC 5 — Interfejs użytkownika (UI/UX)
+5.1 — Strona wyszukiwarki
+5.2 — Podgląd szczegółów mieszkania
+5.3 — Widok porównania ofert
+5.4 — Panel użytkownika
+5.5 — Lista zapisanych
+________________
+
+
+EPIC 6 — Porównywanie mieszkań
+Ten Epic koncentruje się na dostarczeniu użytkownikowi narzędzi do analitycznego zestawienia wybranych ofert, co ułatwia podjęcie ostatecznej decyzji zakupowej lub inwestycyjnej.
+6.1 — Dodawanie ofert do porównania
+* User Story: Jako użytkownik chcę mieć możliwość dodania interesującej mnie oferty do „poczekalni porównania” za pomocą jednego kliknięcia na liście wyników lub stronie szczegółów, aby móc później zestawić ją z innymi.
+* Kryteria akceptacji:
+   * Przycisk „Dodaj do porównania” jest widoczny na karcie produktu i stronie oferty.
+   * System informuje o maksymalnej liczbie ofert w porównywarce (np. do 4 ofert jednocześnie).
+   * Licznik na ikonie porównywarki w menu nawigacyjnym aktualizuje się w czasie rzeczywistym.
+6.2 — Tabela porównawcza
+* User Story: Jako użytkownik chcę zobaczyć czytelną tabelę, w której wiersze reprezentują parametry (cena, metraż, cena za m², piętro, rok budowy), a kolumny wybrane mieszkania, aby szybko dostrzec różnice techniczne.
+* Kryteria akceptacji:
+   * Tabela automatycznie wylicza i wyróżnia (np. kolorem zielonym) najkorzystniejszą wartość w danej kategorii (np. najniższą cenę za $m^2$).
+   * Możliwość ukrywania wierszy, które mają identyczne wartości dla wszystkich porównywanych mieszkań (skupienie na różnicach).
+   * Możliwość usuwania pojedynczych ofert z tabeli bez wychodzenia z widoku.
+6.3 — AI Summary (Podsumowanie różnic przez AI)
+* User Story: Jako użytkownik chcę otrzymać krótkie, wygenerowane przez AI podsumowanie, które w języku naturalnym wskaże „plusy i minusy” każdego z mieszkań na tle pozostałych, aby zaoszczędzić czas na samodzielnej analizie.
+* Kryteria akceptacji:
+   * Przycisk „Generuj analizę AI” uruchamia proces przetwarzania danych przez LLM.
+   * Podsumowanie zawiera konkretne spostrzeżenia, np.: „Mieszkanie A jest najtańsze, ale wymaga remontu, podczas gdy Mieszkanie B oferuje najlepszy standard wykończenia przy zbliżonej lokalizacji”.
+   * Możliwość odświeżenia analizy po zmianie zestawu porównywanych mieszkań.
+6.4 — Wizualizacja lokalizacji (Map Comparison)
+* User Story: Jako użytkownik chcę zobaczyć wszystkie porównywane oferty na jednej mapie z zaznaczonymi kluczowymi punktami (POIs - punkty użyteczności publicznej), aby ocenić, które z nich jest najlepiej skomunikowane.
+* Kryteria akceptacji:
+   * Mapa wyświetla pinezki w różnych kolorach przypisanych do ofert z tabeli.
+   * Wyświetlanie czasu dojazdu do zdefiniowanego „punktu domyślnego” (np. praca użytkownika) dla każdej oferty.
+6.5 — Eksport porównania
+* User Story: Jako użytkownik chcę wyeksportować widok porównania do pliku PDF lub przesłać link do zestawienia innej osobie, aby skonsultować wybór z rodziną lub doradcą.
+* Kryteria akceptacji:
+   * PDF zachowuje układ tabelaryczny i zawiera linki źródłowe do ofert.
+   * Generowany jest unikalny, krótki link (URL) do aktualnego widoku porównywarki.
+
+
+________________
+
+
+EPIC 7 — Raporty i dokumenty
+7.1 — Generowanie raportów PDF
+User Story:
+ Jako użytkownik chcę wygenerować PDF z ofertą, zdjęciami i podsumowaniem.
+________________
+
+
+7.2 — Generowanie streszczeń ofert
+User Story:
+ Jako użytkownik chcę otrzymać skrócony opis oferty napisany językiem naturalnym.
+________________
+
+
+7.3 — Generowanie zestawień wielu ofert
+________________
+
+
+EPIC 8 — Rekomendacje (uczenie preferencji)
+8.1 — Analiza historii kliknięć
+8.2 — Personalizowane rekomendacje
+8.3 — Proponowanie podobnych mieszkań
+________________
+
+
+EPIC 9 — Zarządzanie danymi / automatyzacja
+9.1 — Usuwanie nieaktualnych ogłoszeń
+9.2 — Aktualizacja cen
+9.3 — Rekonstrukcja brakujących danych z użyciem AI
+________________
+
+
+EPIC 10 — Obsługa kont użytkowników
+10.1 — Rejestracja i logowanie
+10.2 — Reset hasła
+10.3 — Zapisane wyszukiwania
+10.4 — Powiadomienia SMS/Email
+________________
+
+
+EPIC 11 — Jakość i bezpieczeństwo
+11.1 — Zgodność z RODO
+11.2 — Szyfrowanie danych
+11.3 — Kontrola uprawnień
+11.4 — Monitoring anomalii
+________________
+
+
+EPIC 12 — Testy i walidacja
+12.1 — Testy semantycznego wyszukiwania (BDD)
+User Story:
+ Jako QA chcę testować wyszukiwanie semantyczne w stylu Given–When–Then, aby upewnić się, że system zwraca właściwe wyniki.
+________________
+
+
+12.2 — Generowanie złośliwych danych wejściowych (LLM)
+User Story:
+ Jako QA chcę automatycznie generować trudne, nietypowe lub edge-case zapytania, aby testować odporność wyszukiwarki semantycznej.
+________________
+
+
+12.3 — Testy OCR
+12.4 — Testy RAG / embeddingów
+12.5 — Testy integracyjne i E2E

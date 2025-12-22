@@ -1,0 +1,142 @@
+{
+  "examples": [
+    {
+      "description": "Search for 2-room apartments in Warszawa with price range 600,000 - 800,000 PLN",
+      "request": {
+        "price_total": {
+          "min": 600000,
+          "max": 800000
+        },
+        "rooms": [2],
+        "city": "Warszawa"
+      }
+    },
+    {
+      "description": "Search for 1-room apartments in Śródmieście district with price per sqm up to 30,000 PLN",
+      "request": {
+        "price_per_sqm": {
+          "min": null,
+          "max": 30000
+        },
+        "rooms": [1],
+        "city_district": "Warszawa Śródmieście"
+      }
+    },
+    {
+      "description": "Search for 2-3 room apartments in any Warszawa district with price range 500,000 - 1,000,000 PLN",
+      "request": {
+        "price_total": {
+          "min": 500000,
+          "max": 1000000
+        },
+        "rooms": [2, 3],
+        "city": "Warszawa"
+      }
+    },
+    {
+      "description": "Search for apartments in Mokotów district with price per sqm between 15,000 - 25,000 PLN",
+      "request": {
+        "price_per_sqm": {
+          "min": 15000,
+          "max": 25000
+        },
+        "city_district": "Warszawa Mokotów"
+      }
+    },
+    {
+      "description": "Search for 1-room apartments with total price up to 600,000 PLN",
+      "request": {
+        "price_total": {
+          "min": null,
+          "max": 600000
+        },
+        "rooms": [1]
+      }
+    },
+    {
+      "description": "Search for 3-room apartments in Warszawa with price range 700,000 - 1,500,000 PLN",
+      "request": {
+        "price_total": {
+          "min": 700000,
+          "max": 1500000
+        },
+        "rooms": [3],
+        "city": "Warszawa"
+      }
+    },
+    {
+      "description": "Search for apartments in Białołęka district with price per sqm up to 20,000 PLN",
+      "request": {
+        "price_per_sqm": {
+          "min": null,
+          "max": 20000
+        },
+        "city_district": "Warszawa Białołęka"
+      }
+    },
+    {
+      "description": "Search for 2-room apartments in Żoliborz with price range 650,000 - 750,000 PLN",
+      "request": {
+        "price_total": {
+          "min": 650000,
+          "max": 750000
+        },
+        "rooms": [2],
+        "city_district": "Warszawa Żoliborz"
+      }
+    },
+    {
+      "description": "Simple search - just 2-room apartments in Warszawa",
+      "request": {
+        "rooms": [2],
+        "city": "Warszawa"
+      }
+    },
+    {
+      "description": "Search for apartments in Praga-Północ with price per sqm between 20,000 - 30,000 PLN",
+      "request": {
+        "price_per_sqm": {
+          "min": 20000,
+          "max": 30000
+        },
+        "city_district": "Warszawa Praga-Północ"
+      }
+    },
+    {
+      "description": "COMPREHENSIVE SEARCH - Using ALL available fields: name, price_total, price_per_sqm, rooms, city, and city_district",
+      "request": {
+        "name": "My comprehensive apartment search",
+        "price_total": {
+          "min": 600000,
+          "max": 1000000
+        },
+        "price_per_sqm": {
+          "min": 15000,
+          "max": 25000
+        },
+        "rooms": [2, 3],
+        "city": "Warszawa",
+        "city_district": "Warszawa Śródmieście"
+      }
+    }
+  ],
+  "curl_examples": [
+    {
+      "description": "Example 1: 2-room apartments in Warszawa, price 600k-800k PLN",
+      "command": "curl -X POST 'http://localhost:8000/filters/search' -H 'Content-Type: application/json' -d '{\"price_total\":{\"min\":600000,\"max\":800000},\"rooms\":[2],\"city\":\"Warszawa\"}'"
+    },
+    {
+      "description": "Example 2: 1-room apartments in Śródmieście, price per sqm up to 30k PLN",
+      "command": "curl -X POST 'http://localhost:8000/filters/search' -H 'Content-Type: application/json' -d '{\"price_per_sqm\":{\"max\":30000},\"rooms\":[1],\"city_district\":\"Warszawa Śródmieście\"}'"
+    },
+    {
+      "description": "Example 3: 2-3 room apartments in Warszawa, price 500k-1M PLN",
+      "command": "curl -X POST 'http://localhost:8000/filters/search' -H 'Content-Type: application/json' -d '{\"price_total\":{\"min\":500000,\"max\":1000000},\"rooms\":[2,3],\"city\":\"Warszawa\"}'"
+    },
+    {
+      "description": "Example 4: Comprehensive search using ALL fields",
+      "command": "curl -X POST 'http://localhost:8000/filters/search' -H 'Content-Type: application/json' -d '{\"name\":\"My comprehensive apartment search\",\"price_total\":{\"min\":600000,\"max\":1000000},\"price_per_sqm\":{\"min\":15000,\"max\":25000},\"rooms\":[2,3],\"city\":\"Warszawa\",\"city_district\":\"Warszawa Śródmieście\"}'"
+    }
+  ]
+}
+
