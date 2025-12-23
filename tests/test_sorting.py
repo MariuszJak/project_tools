@@ -213,4 +213,3 @@ def test_sort_preserves_original_list(mock_offers):
     assert mock_offers == original_list
     # Sorted list should be different
     assert sorted_offers != original_list
-

@@ -6,7 +6,7 @@ from sqlalchemy import Column, DateTime, func
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from typing import List
+    pass
 
 
 class Location(SQLModel, table=True):

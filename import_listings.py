@@ -30,18 +30,18 @@ def parse_value(value: str, value_type: type) -> Any:
     if not value:
         return None
     cleaned = str(value).strip().replace(" ", "")
-    if value_type == int:
+    if value_type is int:
         try:
             return int(cleaned)
         except (ValueError, TypeError):
             return None
-    elif value_type == Decimal:
+    elif value_type is Decimal:
         cleaned = cleaned.replace(",", ".")
         try:
             return Decimal(cleaned)
         except (InvalidOperation, ValueError, TypeError):
             return None
-    elif value_type == bool:
+    elif value_type is bool:
         cleaned = cleaned.lower()
         if cleaned in ["tak", "yes", "true", "1", "t"]:
             return True
@@ -49,11 +49,14 @@ def parse_value(value: str, value_type: type) -> Any:
             return False
     return None
 
+
 def parse_int(value: str) -> int | None:
     return parse_value(value, int)
 
+
 def parse_decimal(value: str) -> Decimal | None:
     return parse_value(value, Decimal)
+
 
 def parse_boolean(value: str) -> bool | None:
     return parse_value(value, bool)

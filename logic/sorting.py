@@ -11,11 +11,12 @@ This module provides the OfferSorter class for sorting listings based on various
 from copy import deepcopy
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 class SortType(Enum):
     """Sort criteria for offers."""
+
     PRICE = "price"
     PRICE_PER_SQM = "price_per_sqm"
     DATE_POSTED = "date_posted"
@@ -33,7 +34,7 @@ class OfferSorter:
         """Initialize the OfferSorter."""
         pass
 
-    def _get_price_per_sqm(self, offer: dict[str, Any]) -> Optional[Decimal]:
+    def _get_price_per_sqm(self, offer: dict[str, Any]) -> Decimal | None:
         """
         Retrieve or compute price per square meter.
         - Prefer "price_per_sqm_detailed"
@@ -101,9 +102,12 @@ class OfferSorter:
         def sort_key(offer: dict[str, Any]) -> tuple[bool, Any]:
             """Return a tuple for sorting; (is_missing, value)."""
             attribute = sort_attribute_map.get(sort_type)
-            value = getattr(self, attribute)(offer) if callable(getattr(self, attribute, None)) else offer.get(attribute)
+            value = (
+                getattr(self, attribute)(offer)
+                if callable(getattr(self, attribute, None))
+                else offer.get(attribute)
+            )
             return (value is None, value)
 
         sorted_offers.sort(key=sort_key, reverse=reverse)
         return sorted_offers
-
