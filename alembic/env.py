@@ -11,10 +11,10 @@ from alembic import context
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Import Base
-from models.base import Base  # noqa: E402
+# Import SQLModel
+from sqlmodel import SQLModel  # noqa: E402
 
-# Import models to register them with Base
+# Import models to register them with SQLModel
 from models.models import (  # noqa: E402, F401
     Building,
     Features,
@@ -35,7 +35,7 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-target_metadata = Base.metadata
+target_metadata = SQLModel.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

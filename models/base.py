@@ -1,4 +1,5 @@
-from sqlalchemy.orm import declarative_base
+from sqlmodel import SQLModel
 
 # Base class for models (used by Alembic migrations)
-Base = declarative_base()
+# SQLModel provides the base class directly
+Base = SQLModel

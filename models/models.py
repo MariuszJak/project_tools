@@ -1,117 +1,120 @@
-from sqlalchemy import (
-    Boolean,
-    Column,
-    Date,
-    DateTime,
-    ForeignKey,
-    Integer,
-    Numeric,
-    SmallInteger,
-    String,
-    Text,
-)
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+from datetime import date, datetime
+from decimal import Decimal
+from typing import TYPE_CHECKING
 
-try:
-    from .base import Base
-except ImportError:
-    # Fallback for direct imports (e.g., Alembic)
-    from models.base import Base
+from sqlalchemy import Column, DateTime, func
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from typing import List
 
 
-class Location(Base):
+class Location(SQLModel, table=True):
+    """Location model for storing address and geographic information"""
+
     __tablename__ = "location"
 
-    location_id = Column(Integer, primary_key=True, autoincrement=True)
-    city = Column(String(255), nullable=True)
-    locality = Column(String(255), nullable=True)
-    city_district = Column(String(255), nullable=True)
-    street = Column(String(255), nullable=True)
-    full_address = Column(String(500), nullable=True)
-    latitude = Column(Numeric(9, 6), nullable=True)
-    longitude = Column(Numeric(9, 6), nullable=True)
+    location_id: int | None = Field(default=None, primary_key=True)
+    city: str | None = Field(default=None, max_length=255)
+    locality: str | None = Field(default=None, max_length=255)
+    city_district: str | None = Field(default=None, max_length=255)
+    street: str | None = Field(default=None, max_length=255)
+    full_address: str | None = Field(default=None, max_length=500)
+    latitude: Decimal | None = Field(default=None)
+    longitude: Decimal | None = Field(default=None)
 
     # Relationship
-    listings = relationship("Listing", back_populates="location")
+    listings: list["Listing"] = Relationship(back_populates="location")
 
 
-class Building(Base):
+class Building(SQLModel, table=True):
+    """Building model for storing building-related information"""
+
     __tablename__ = "building"
 
-    building_id = Column(Integer, primary_key=True, autoincrement=True)
-    year_built = Column(SmallInteger, nullable=True)
-    building_type = Column(String(100), nullable=True)
-    floor = Column(SmallInteger, nullable=True)
+    building_id: int | None = Field(default=None, primary_key=True)
+    year_built: int | None = Field(default=None)
+    building_type: str | None = Field(default=None, max_length=100)
+    floor: int | None = Field(default=None)
 
     # Relationship
-    listings = relationship("Listing", back_populates="building")
+    listings: list["Listing"] = Relationship(back_populates="building")
 
 
-class Owner(Base):
+class Owner(SQLModel, table=True):
+    """Owner model for storing owner contact information"""
+
     __tablename__ = "owner"
 
-    owner_id = Column(Integer, primary_key=True, autoincrement=True)
-    owner_type = Column(String(50), nullable=True)
-    contact_name = Column(String(255), nullable=True)
-    contact_phone = Column(String(50), nullable=True)
-    contact_email = Column(String(255), nullable=True)
+    owner_id: int | None = Field(default=None, primary_key=True)
+    owner_type: str | None = Field(default=None, max_length=50)
+    contact_name: str | None = Field(default=None, max_length=255)
+    contact_phone: str | None = Field(default=None, max_length=50)
+    contact_email: str | None = Field(default=None, max_length=255)
 
     # Relationship
-    listings = relationship("Listing", back_populates="owner")
+    listings: list["Listing"] = Relationship(back_populates="owner")
 
 
-class Features(Base):
+class Features(SQLModel, table=True):
+    """Features model for storing property features"""
+
     __tablename__ = "features"
 
-    features_id = Column(Integer, primary_key=True, autoincrement=True)
-    has_basement = Column(Boolean, nullable=True)
-    has_parking = Column(Boolean, nullable=True)
-    kitchen_type = Column(String(100), nullable=True)
-    window_type = Column(String(100), nullable=True)
-    ownership_type = Column(String(100), nullable=True)
-    equipment = Column(Text, nullable=True)
+    features_id: int | None = Field(default=None, primary_key=True)
+    has_basement: bool | None = Field(default=None)
+    has_parking: bool | None = Field(default=None)
+    kitchen_type: str | None = Field(default=None, max_length=100)
+    window_type: str | None = Field(default=None, max_length=100)
+    ownership_type: str | None = Field(default=None, max_length=100)
+    equipment: str | None = Field(default=None)
 
     # Relationship
-    listings = relationship("Listing", back_populates="features")
+    listings: list["Listing"] = Relationship(back_populates="features")
 
 
-class Listing(Base):
+class Listing(SQLModel, table=True):
+    """Listing model for storing property listing information"""
+
     __tablename__ = "listing"
 
-    listing_id = Column(Integer, primary_key=True, autoincrement=True)
-    location_id = Column(Integer, ForeignKey("location.location_id"), nullable=False)
-    building_id = Column(Integer, ForeignKey("building.building_id"), nullable=False)
-    owner_id = Column(Integer, ForeignKey("owner.owner_id"), nullable=False)
-    features_id = Column(Integer, ForeignKey("features.features_id"), nullable=False)
-    rooms = Column(SmallInteger, nullable=True)
-    area = Column(Numeric(6, 2), nullable=True)
-    price_total_zl = Column(Numeric(12, 2), nullable=True)
-    price_sqm_zl = Column(Numeric(12, 2), nullable=True)
-    price_per_sqm_detailed = Column(Numeric(12, 2), nullable=True)
-    date_posted = Column(Date, nullable=True)
-    photo_count = Column(Integer, nullable=True)
-    url = Column(Text, nullable=True)
-    image_url = Column(Text, nullable=True)
-    description_text = Column(Text, nullable=True)
+    listing_id: int | None = Field(default=None, primary_key=True)
+    location_id: int = Field(foreign_key="location.location_id")
+    building_id: int = Field(foreign_key="building.building_id")
+    owner_id: int = Field(foreign_key="owner.owner_id")
+    features_id: int = Field(foreign_key="features.features_id")
+    rooms: int | None = Field(default=None)
+    area: Decimal | None = Field(default=None)
+    price_total_zl: Decimal | None = Field(default=None)
+    price_sqm_zl: Decimal | None = Field(default=None)
+    price_per_sqm_detailed: Decimal | None = Field(default=None)
+    date_posted: date | None = Field(default=None)
+    photo_count: int | None = Field(default=None)
+    url: str | None = Field(default=None)
+    image_url: str | None = Field(default=None)
+    description_text: str | None = Field(default=None)
 
     # Relationships
-    location = relationship("Location", back_populates="listings")
-    building = relationship("Building", back_populates="listings")
-    owner = relationship("Owner", back_populates="listings")
-    features = relationship("Features", back_populates="listings")
+    location: Location = Relationship(back_populates="listings")
+    building: Building = Relationship(back_populates="listings")
+    owner: Owner = Relationship(back_populates="listings")
+    features: Features = Relationship(back_populates="listings")
 
 
-class SavedFilter(Base):
+class SavedFilter(SQLModel, table=True):
+    """Saved filter model for storing user search filters"""
+
     __tablename__ = "saved_filters"
 
-    filter_id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(255), nullable=False)
-    price_min = Column(Numeric(12, 2), nullable=True)
-    price_max = Column(Numeric(12, 2), nullable=True)
-    price_sqm_min = Column(Numeric(12, 2), nullable=True)
-    price_sqm_max = Column(Numeric(12, 2), nullable=True)
-    rooms = Column(Text, nullable=True)  # JSON array stored as text
-    city = Column(String(255), nullable=True)
-    city_district = Column(String(255), nullable=True)
-    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    filter_id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(max_length=255)
+    price_min: Decimal | None = Field(default=None)
+    price_max: Decimal | None = Field(default=None)
+    price_sqm_min: Decimal | None = Field(default=None)
+    price_sqm_max: Decimal | None = Field(default=None)
+    rooms: str | None = Field(default=None)  # JSON array stored as text
+    city: str | None = Field(default=None, max_length=255)
+    city_district: str | None = Field(default=None, max_length=255)
+    created_at: datetime = Field(
+        sa_column=Column(DateTime, server_default=func.now(), nullable=False)
+    )

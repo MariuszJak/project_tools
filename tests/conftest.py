@@ -14,8 +14,9 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
+from sqlmodel import SQLModel
+
 from main import app
-from models.base import Base
 from models.database import get_db
 
 # Test database URL - using in-memory SQLite for faster tests
@@ -37,7 +38,7 @@ async def test_engine():
 
     # Create all tables
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(SQLModel.metadata.create_all)
 
     yield engine
 
