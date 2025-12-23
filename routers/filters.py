@@ -73,13 +73,17 @@ async def save_filter(
     await db.commit()
     await db.refresh(new_filter)
 
-    # Parse rooms JSON back to list
-    rooms_list = None
-    if new_filter.rooms:
+    def parse_rooms_json(rooms_json: str | None) -> list[int] | None:
+        """Parse rooms JSON string back to list."""
+        if not rooms_json:
+            return None
         try:
-            rooms_list = json.loads(new_filter.rooms)
+            return json.loads(rooms_json)
         except json.JSONDecodeError:
-            rooms_list = None
+            return None
+
+    # Use the new function
+    rooms_list = parse_rooms_json(new_filter.rooms)
 
     # Return response
     return SavedFilterResponse(

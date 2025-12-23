@@ -91,24 +91,18 @@ class OfferSorter:
 
         reverse = order == "desc"
 
-        def sort_key(offer: dict[str, Any]) -> tuple[bool, Any]:
-            """
-            Return a tuple for sorting; (is_missing, value).
-            None values are sorted to end for asc, start for desc.
-            """
-            if sort_type == SortType.PRICE:
-                value = offer.get("price_total_zl")
-            elif sort_type == SortType.AREA:
-                value = offer.get("area")
-            elif sort_type == SortType.DATE_POSTED:
-                value = offer.get("date_posted")
-            elif sort_type == SortType.PRICE_PER_SQM:
-                value = self._get_price_per_sqm(offer)
-            else:
-                value = None
+        sort_attribute_map = {
+            SortType.PRICE: "price_total_zl",
+            SortType.AREA: "area",
+            SortType.DATE_POSTED: "date_posted",
+            SortType.PRICE_PER_SQM: "_get_price_per_sqm",
+        }
 
-            is_missing = value is None
-            return (is_missing, value)
+        def sort_key(offer: dict[str, Any]) -> tuple[bool, Any]:
+            """Return a tuple for sorting; (is_missing, value)."""
+            attribute = sort_attribute_map.get(sort_type)
+            value = getattr(self, attribute)(offer) if callable(getattr(self, attribute, None)) else offer.get(attribute)
+            return (value is None, value)
 
         sorted_offers.sort(key=sort_key, reverse=reverse)
         return sorted_offers

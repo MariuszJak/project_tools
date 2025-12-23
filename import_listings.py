@@ -25,46 +25,38 @@ def clean_string(value: str) -> str | None:
     return cleaned if cleaned else None
 
 
-def parse_int(value: str) -> int | None:
-    """Parse integer from string, handling spaces and empty values."""
+def parse_value(value: str, value_type: type) -> Any:
+    """Generic parser for int, Decimal, and bool."""
     if not value:
         return None
-    if isinstance(value, int):
-        return value
     cleaned = str(value).strip().replace(" ", "")
-    if not cleaned or cleaned.lower() in ["", "none", "null"]:
-        return None
-    try:
-        return int(cleaned)
-    except (ValueError, TypeError):
-        return None
+    if value_type == int:
+        try:
+            return int(cleaned)
+        except (ValueError, TypeError):
+            return None
+    elif value_type == Decimal:
+        cleaned = cleaned.replace(",", ".")
+        try:
+            return Decimal(cleaned)
+        except (InvalidOperation, ValueError, TypeError):
+            return None
+    elif value_type == bool:
+        cleaned = cleaned.lower()
+        if cleaned in ["tak", "yes", "true", "1", "t"]:
+            return True
+        if cleaned in ["nie", "no", "false", "0", "f", ""]:
+            return False
+    return None
 
+def parse_int(value: str) -> int | None:
+    return parse_value(value, int)
 
 def parse_decimal(value: str) -> Decimal | None:
-    """Parse decimal from string, handling spaces and empty values."""
-    if not value:
-        return None
-    if isinstance(value, (int, float)):
-        return Decimal(str(value))
-    cleaned = str(value).strip().replace(" ", "").replace(",", ".")
-    if not cleaned or cleaned.lower() in ["", "none", "null", "zapytaj o cenę"]:
-        return None
-    try:
-        return Decimal(cleaned)
-    except (InvalidOperation, ValueError, TypeError):
-        return None
-
+    return parse_value(value, Decimal)
 
 def parse_boolean(value: str) -> bool | None:
-    """Parse boolean from string."""
-    if not value:
-        return None
-    cleaned = str(value).strip().lower()
-    if cleaned in ["tak", "yes", "true", "1", "t"]:
-        return True
-    if cleaned in ["nie", "no", "false", "0", "f", ""]:
-        return False
-    return None
+    return parse_value(value, bool)
 
 
 def parse_floor(value: str) -> int | None:
