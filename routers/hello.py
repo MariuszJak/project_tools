@@ -14,7 +14,7 @@ router = APIRouter()
 async def hello_world() -> HelloResponse:
     """
     Endpoint that returns a classic Hello World message.
-    
+
     Returns:
         HelloResponse: Hello World message
     """
@@ -30,12 +30,11 @@ async def hello_world() -> HelloResponse:
 async def hello(name: str) -> HelloResponse:
     """
     Endpoint that returns a personalized greeting.
-    
+
     Args:
         name: User's name for greeting
-    
+
     Returns:
         HelloResponse: Greeting message with the name
     """
     return HelloResponse(message=f"Hello {name}")
-

@@ -1,5 +1,4 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from .base import Base
 
 # SQLite connection string
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./sql_app.db"
@@ -30,4 +29,3 @@ async def get_db() -> AsyncSession:
             await session.rollback()
             raise
         # Session is automatically closed by the context manager
-

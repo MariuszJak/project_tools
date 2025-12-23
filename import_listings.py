@@ -2,21 +2,22 @@
 Script to import listings data from CSV file to database.
 Cleans and validates data before inserting into database.
 """
+
+import asyncio
 import csv
 import re
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
-from typing import Optional, Dict, Any
-import asyncio
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.database import async_session_maker
-from models.models import Location, Building, Owner, Features, Listing
+from models.models import Building, Features, Listing, Location, Owner
 
 
-def clean_string(value: str) -> Optional[str]:
+def clean_string(value: str) -> str | None:
     """Clean string value - strip whitespace and return None if empty."""
     if not value or not isinstance(value, str):
         return None
@@ -24,7 +25,7 @@ def clean_string(value: str) -> Optional[str]:
     return cleaned if cleaned else None
 
 
-def parse_int(value: str) -> Optional[int]:
+def parse_int(value: str) -> int | None:
     """Parse integer from string, handling spaces and empty values."""
     if not value:
         return None
@@ -39,7 +40,7 @@ def parse_int(value: str) -> Optional[int]:
         return None
 
 
-def parse_decimal(value: str) -> Optional[Decimal]:
+def parse_decimal(value: str) -> Decimal | None:
     """Parse decimal from string, handling spaces and empty values."""
     if not value:
         return None
@@ -54,7 +55,7 @@ def parse_decimal(value: str) -> Optional[Decimal]:
         return None
 
 
-def parse_boolean(value: str) -> Optional[bool]:
+def parse_boolean(value: str) -> bool | None:
     """Parse boolean from string."""
     if not value:
         return None
@@ -66,7 +67,7 @@ def parse_boolean(value: str) -> Optional[bool]:
     return None
 
 
-def parse_floor(value: str) -> Optional[int]:
+def parse_floor(value: str) -> int | None:
     """Parse floor number from string (handles 'parter', '3 / winda', etc.)."""
     if not value:
         return None
@@ -83,12 +84,12 @@ def parse_floor(value: str) -> Optional[int]:
     return None
 
 
-def parse_date(value: str) -> Optional[datetime]:
+def parse_date(value: str) -> datetime | None:
     """Parse date from Polish text format."""
     if not value:
         return None
     cleaned = str(value).strip().lower()
-    
+
     # Handle relative dates
     today = datetime.now()
     if "wczoraj" in cleaned or "yesterday" in cleaned:
@@ -99,13 +100,13 @@ def parse_date(value: str) -> Optional[datetime]:
         return today - timedelta(days=8)
     if "tydzień" in cleaned or "week" in cleaned:
         return today - timedelta(days=7)
-    
+
     # Try to extract days ago
     days_match = re.search(r"(\d+)\s*dni?\s*temu", cleaned)
     if days_match:
         days = int(days_match.group(1))
         return today - timedelta(days=days)
-    
+
     # Try standard date formats
     date_formats = [
         "%Y-%m-%d",
@@ -118,11 +119,11 @@ def parse_date(value: str) -> Optional[datetime]:
             return datetime.strptime(cleaned, fmt)
         except (ValueError, TypeError):
             continue
-    
+
     return None
 
 
-def extract_city_from_locality(locality: Optional[str]) -> Optional[str]:
+def extract_city_from_locality(locality: str | None) -> str | None:
     """Extract city name from locality field (e.g., 'Warszawa Praga-Północ' -> 'Warszawa')."""
     if not locality:
         return None
@@ -140,26 +141,26 @@ def extract_city_from_locality(locality: Optional[str]) -> Optional[str]:
 
 async def get_or_create_location(
     session: AsyncSession,
-    city: Optional[str],
-    locality: Optional[str],
-    street: Optional[str],
-    city_district: Optional[str],
-    full_address: Optional[str],
-    latitude: Optional[Decimal],
-    longitude: Optional[Decimal],
+    city: str | None,
+    locality: str | None,
+    street: str | None,
+    city_district: str | None,
+    full_address: str | None,
+    latitude: Decimal | None,
+    longitude: Decimal | None,
 ) -> Location:
     """Get existing location or create new one."""
     # Try to find existing location by unique combination
     query = select(Location)
     conditions = []
-    
+
     if locality:
         conditions.append(Location.locality == locality)
     if street:
         conditions.append(Location.street == street)
     if full_address:
         conditions.append(Location.full_address == full_address)
-    
+
     if conditions:
         query = query.where(*conditions)
         result = await session.execute(query)
@@ -169,7 +170,7 @@ async def get_or_create_location(
             if not existing.city and city:
                 existing.city = city
             return existing
-    
+
     # Create new location
     location = Location(
         city=city,
@@ -187,9 +188,9 @@ async def get_or_create_location(
 
 async def get_or_create_building(
     session: AsyncSession,
-    year_built: Optional[int],
-    building_type: Optional[str],
-    floor: Optional[int],
+    year_built: int | None,
+    building_type: str | None,
+    floor: int | None,
 ) -> Building:
     """Get existing building or create new one."""
     # Try to find existing building
@@ -202,7 +203,7 @@ async def get_or_create_building(
     existing = result.scalar_one_or_none()
     if existing:
         return existing
-    
+
     # Create new building
     building = Building(
         year_built=year_built,
@@ -216,7 +217,7 @@ async def get_or_create_building(
 
 async def get_or_create_owner(
     session: AsyncSession,
-    owner_type: Optional[str],
+    owner_type: str | None,
 ) -> Owner:
     """Get existing owner or create new one."""
     # Try to find existing owner by type
@@ -225,7 +226,7 @@ async def get_or_create_owner(
     existing = result.scalar_one_or_none()
     if existing:
         return existing
-    
+
     # Create new owner
     owner = Owner(owner_type=owner_type)
     session.add(owner)
@@ -235,12 +236,12 @@ async def get_or_create_owner(
 
 async def get_or_create_features(
     session: AsyncSession,
-    has_basement: Optional[bool],
-    has_parking: Optional[bool],
-    kitchen_type: Optional[str],
-    window_type: Optional[str],
-    ownership_type: Optional[str],
-    equipment: Optional[str],
+    has_basement: bool | None,
+    has_parking: bool | None,
+    kitchen_type: str | None,
+    window_type: str | None,
+    ownership_type: str | None,
+    equipment: str | None,
 ) -> Features:
     """Get existing features or create new one."""
     # Try to find existing features
@@ -256,7 +257,7 @@ async def get_or_create_features(
     existing = result.scalar_one_or_none()
     if existing:
         return existing
-    
+
     # Create new features
     features = Features(
         has_basement=has_basement,
@@ -271,11 +272,11 @@ async def get_or_create_features(
     return features
 
 
-def clean_row(row: Dict[str, str]) -> Dict[str, Any]:
+def clean_row(row: dict[str, str]) -> dict[str, Any]:
     """Clean and parse a single CSV row."""
     locality = clean_string(row.get("locality"))
     city = extract_city_from_locality(locality)
-    
+
     return {
         "city": city,
         "locality": locality,
@@ -310,7 +311,7 @@ def clean_row(row: Dict[str, str]) -> Dict[str, Any]:
 async def import_listings_from_csv(csv_path: str, batch_size: int = 100):
     """
     Import listings from CSV file to database.
-    
+
     Args:
         csv_path: Path to CSV file
         batch_size: Number of records to process in one transaction
@@ -318,12 +319,12 @@ async def import_listings_from_csv(csv_path: str, batch_size: int = 100):
     imported_count = 0
     skipped_count = 0
     error_count = 0
-    
+
     async with async_session_maker() as session:
         try:
-            with open(csv_path, "r", encoding="utf-8") as f:
+            with open(csv_path, encoding="utf-8") as f:
                 reader = csv.DictReader(f)
-                
+
                 batch = []
                 for row_num, row in enumerate(reader, start=2):  # Start at 2 (row 1 is header)
                     try:
@@ -331,16 +332,16 @@ async def import_listings_from_csv(csv_path: str, batch_size: int = 100):
                         if not any(row.values()):
                             skipped_count += 1
                             continue
-                        
+
                         cleaned = clean_row(row)
-                        
+
                         # Skip rows without essential data
                         if not cleaned.get("url"):
                             skipped_count += 1
                             continue
-                        
+
                         batch.append(cleaned)
-                        
+
                         # Process batch when it reaches batch_size
                         if len(batch) >= batch_size:
                             processed = await process_batch(session, batch)
@@ -348,23 +349,23 @@ async def import_listings_from_csv(csv_path: str, batch_size: int = 100):
                             batch = []
                             await session.commit()
                             print(f"Processed {imported_count} listings...")
-                    
+
                     except Exception as e:
                         error_count += 1
                         print(f"Error processing row {row_num}: {e}")
                         continue
-                
+
                 # Process remaining batch
                 if batch:
                     processed = await process_batch(session, batch)
                     imported_count += processed
                     await session.commit()
-            
-            print(f"\nImport completed:")
+
+            print("\nImport completed:")
             print(f"  Imported: {imported_count}")
             print(f"  Skipped: {skipped_count}")
             print(f"  Errors: {error_count}")
-        
+
         except Exception as e:
             await session.rollback()
             print(f"Fatal error during import: {e}")
@@ -374,7 +375,7 @@ async def import_listings_from_csv(csv_path: str, batch_size: int = 100):
 async def process_batch(session: AsyncSession, batch: list) -> int:
     """Process a batch of cleaned rows."""
     imported = 0
-    
+
     for cleaned in batch:
         try:
             # Get or create related entities
@@ -388,19 +389,19 @@ async def process_batch(session: AsyncSession, batch: list) -> int:
                 cleaned["latitude"],
                 cleaned["longitude"],
             )
-            
+
             building = await get_or_create_building(
                 session,
                 cleaned["year_built"],
                 cleaned["building_type"],
                 cleaned["floor"],
             )
-            
+
             owner = await get_or_create_owner(
                 session,
                 cleaned["owner_type"],
             )
-            
+
             features = await get_or_create_features(
                 session,
                 cleaned["has_basement"],
@@ -410,12 +411,12 @@ async def process_batch(session: AsyncSession, batch: list) -> int:
                 cleaned["ownership_type"],
                 cleaned["equipment"],
             )
-            
+
             # Check if listing with same URL already exists
             existing_query = select(Listing).where(Listing.url == cleaned["url"])
             result = await session.execute(existing_query)
             existing_listing = result.scalar_one_or_none()
-            
+
             if existing_listing:
                 # Update existing listing
                 existing_listing.location_id = location.location_id
@@ -450,13 +451,13 @@ async def process_batch(session: AsyncSession, batch: list) -> int:
                     description_text=cleaned["description_text"],
                 )
                 session.add(listing)
-            
+
             imported += 1
-        
+
         except Exception as e:
             print(f"Error processing listing: {e}")
             continue
-    
+
     return imported
 
 
@@ -469,4 +470,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

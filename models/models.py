@@ -1,6 +1,17 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, Text, Date, SmallInteger, ForeignKey, DateTime
-from sqlalchemy.sql import func
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    SmallInteger,
+    String,
+    Text,
+)
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 try:
     from .base import Base
@@ -104,4 +115,3 @@ class SavedFilter(Base):
     city = Column(String(255), nullable=True)
     city_district = Column(String(255), nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
-

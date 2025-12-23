@@ -1,56 +1,50 @@
+from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional, List
-from datetime import datetime, date
-from pydantic import BaseModel, Field, ConfigDict, field_validator
-import json
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class PriceRange(BaseModel):
     """Schema for price range (min and max values)"""
-    min: Optional[Decimal] = Field(None, description="Minimum price value")
-    max: Optional[Decimal] = Field(None, description="Maximum price value")
 
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "min": 200000.00,
-                "max": 500000.00
-            }
-        }
-    )
+    min: Decimal | None = Field(None, description="Minimum price value")
+    max: Decimal | None = Field(None, description="Maximum price value")
+
+    model_config = ConfigDict(json_schema_extra={"example": {"min": 200000.00, "max": 500000.00}})
 
 
 class SaveFilterRequest(BaseModel):
     """Request schema for saving search filters"""
+
     name: str = Field(..., min_length=1, max_length=255, description="Name of the saved filter")
-    price_total: Optional[PriceRange] = Field(None, description="Range for total price (PLN)")
-    price_per_sqm: Optional[PriceRange] = Field(None, description="Range for price per square meter (PLN/m²)")
-    rooms: Optional[List[int]] = Field(None, description="List of room counts to filter (multi-select)")
-    city: Optional[str] = Field(None, max_length=255, description="City name for autocomplete")
-    city_district: Optional[str] = Field(None, max_length=255, description="City district name for autocomplete")
+    price_total: PriceRange | None = Field(None, description="Range for total price (PLN)")
+    price_per_sqm: PriceRange | None = Field(
+        None, description="Range for price per square meter (PLN/m²)"
+    )
+    rooms: list[int] | None = Field(
+        None, description="List of room counts to filter (multi-select)"
+    )
+    city: str | None = Field(None, max_length=255, description="City name for autocomplete")
+    city_district: str | None = Field(
+        None, max_length=255, description="City district name for autocomplete"
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "name": "My apartment search",
-                "price_total": {
-                    "min": 300000.00,
-                    "max": 600000.00
-                },
-                "price_per_sqm": {
-                    "min": 8000.00,
-                    "max": 12000.00
-                },
+                "price_total": {"min": 300000.00, "max": 600000.00},
+                "price_per_sqm": {"min": 8000.00, "max": 12000.00},
                 "rooms": [2, 3],
                 "city": "Warszawa",
-                "city_district": "Śródmieście"
+                "city_district": "Śródmieście",
             }
         }
     )
 
     @field_validator("rooms")
     @classmethod
-    def validate_rooms(cls, v: Optional[List[int]]) -> Optional[List[int]]:
+    def validate_rooms(cls, v: list[int] | None) -> list[int] | None:
         """Validate that room counts are positive integers"""
         if v is not None:
             for room in v:
@@ -61,15 +55,16 @@ class SaveFilterRequest(BaseModel):
 
 class SavedFilterResponse(BaseModel):
     """Response schema for saved filter"""
+
     filter_id: int = Field(..., description="Unique identifier for the saved filter")
     name: str = Field(..., description="Name of the saved filter")
-    price_min: Optional[Decimal] = Field(None, description="Minimum total price")
-    price_max: Optional[Decimal] = Field(None, description="Maximum total price")
-    price_sqm_min: Optional[Decimal] = Field(None, description="Minimum price per square meter")
-    price_sqm_max: Optional[Decimal] = Field(None, description="Maximum price per square meter")
-    rooms: Optional[List[int]] = Field(None, description="List of room counts")
-    city: Optional[str] = Field(None, description="City name")
-    city_district: Optional[str] = Field(None, description="City district name")
+    price_min: Decimal | None = Field(None, description="Minimum total price")
+    price_max: Decimal | None = Field(None, description="Maximum total price")
+    price_sqm_min: Decimal | None = Field(None, description="Minimum price per square meter")
+    price_sqm_max: Decimal | None = Field(None, description="Maximum price per square meter")
+    rooms: list[int] | None = Field(None, description="List of room counts")
+    city: str | None = Field(None, description="City name")
+    city_district: str | None = Field(None, description="City district name")
     created_at: datetime = Field(..., description="Timestamp when filter was created")
 
     model_config = ConfigDict(
@@ -84,7 +79,7 @@ class SavedFilterResponse(BaseModel):
                 "rooms": [2, 3],
                 "city": "Warszawa",
                 "city_district": "Śródmieście",
-                "created_at": "2024-01-15T10:30:00"
+                "created_at": "2024-01-15T10:30:00",
             }
         }
     )
@@ -92,7 +87,8 @@ class SavedFilterResponse(BaseModel):
 
 class SavedFilterListResponse(BaseModel):
     """Response schema for list of saved filters"""
-    filters: List[SavedFilterResponse] = Field(..., description="List of saved filters")
+
+    filters: list[SavedFilterResponse] = Field(..., description="List of saved filters")
     total: int = Field(..., description="Total number of saved filters")
 
     model_config = ConfigDict(
@@ -109,10 +105,10 @@ class SavedFilterListResponse(BaseModel):
                         "rooms": [2, 3],
                         "city": "Warszawa",
                         "city_district": "Śródmieście",
-                        "created_at": "2024-01-15T10:30:00"
+                        "created_at": "2024-01-15T10:30:00",
                     }
                 ],
-                "total": 1
+                "total": 1,
             }
         }
     )
@@ -120,35 +116,38 @@ class SavedFilterListResponse(BaseModel):
 
 class FilterRequest(BaseModel):
     """Request schema for filtering listings"""
-    name: Optional[str] = Field(None, max_length=255, description="Optional name for the filter (not used in filtering)")
-    price_total: Optional[PriceRange] = Field(None, description="Range for total price (PLN)")
-    price_per_sqm: Optional[PriceRange] = Field(None, description="Range for price per square meter (PLN/m²)")
-    rooms: Optional[List[int]] = Field(None, description="List of room counts to filter (multi-select)")
-    city: Optional[str] = Field(None, max_length=255, description="City name for filtering")
-    city_district: Optional[str] = Field(None, max_length=255, description="City district name for filtering")
+
+    name: str | None = Field(
+        None, max_length=255, description="Optional name for the filter (not used in filtering)"
+    )
+    price_total: PriceRange | None = Field(None, description="Range for total price (PLN)")
+    price_per_sqm: PriceRange | None = Field(
+        None, description="Range for price per square meter (PLN/m²)"
+    )
+    rooms: list[int] | None = Field(
+        None, description="List of room counts to filter (multi-select)"
+    )
+    city: str | None = Field(None, max_length=255, description="City name for filtering")
+    city_district: str | None = Field(
+        None, max_length=255, description="City district name for filtering"
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "name": "My apartment search",
-                "price_total": {
-                    "min": 300000.00,
-                    "max": 600000.00
-                },
-                "price_per_sqm": {
-                    "min": 8000.00,
-                    "max": 12000.00
-                },
+                "price_total": {"min": 300000.00, "max": 600000.00},
+                "price_per_sqm": {"min": 8000.00, "max": 12000.00},
                 "rooms": [2, 3],
                 "city": "Warszawa",
-                "city_district": "Śródmieście"
+                "city_district": "Śródmieście",
             }
         }
     )
 
     @field_validator("rooms")
     @classmethod
-    def validate_rooms(cls, v: Optional[List[int]]) -> Optional[List[int]]:
+    def validate_rooms(cls, v: list[int] | None) -> list[int] | None:
         """Validate that room counts are positive integers"""
         if v is not None:
             for room in v:
@@ -159,14 +158,15 @@ class FilterRequest(BaseModel):
 
 class LocationInfo(BaseModel):
     """Location information included in listing response"""
+
     location_id: int = Field(..., description="Unique identifier for the location")
-    city: Optional[str] = Field(None, description="City name")
-    locality: Optional[str] = Field(None, description="Locality name")
-    city_district: Optional[str] = Field(None, description="City district name")
-    street: Optional[str] = Field(None, description="Street name")
-    full_address: Optional[str] = Field(None, description="Full address string")
-    latitude: Optional[Decimal] = Field(None, description="Latitude coordinate")
-    longitude: Optional[Decimal] = Field(None, description="Longitude coordinate")
+    city: str | None = Field(None, description="City name")
+    locality: str | None = Field(None, description="Locality name")
+    city_district: str | None = Field(None, description="City district name")
+    street: str | None = Field(None, description="Street name")
+    full_address: str | None = Field(None, description="Full address string")
+    latitude: Decimal | None = Field(None, description="Latitude coordinate")
+    longitude: Decimal | None = Field(None, description="Longitude coordinate")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -186,17 +186,20 @@ class LocationInfo(BaseModel):
 
 class ListingWithLocationResponse(BaseModel):
     """Response schema for listing with location information"""
+
     listing_id: int = Field(..., description="Unique identifier for the listing")
-    rooms: Optional[int] = Field(None, description="Number of rooms")
-    area: Optional[Decimal] = Field(None, description="Area in square meters")
-    price_total_zl: Optional[Decimal] = Field(None, description="Total price in PLN")
-    price_sqm_zl: Optional[Decimal] = Field(None, description="Price per square meter in PLN")
-    price_per_sqm_detailed: Optional[Decimal] = Field(None, description="Detailed price per square meter in PLN")
-    date_posted: Optional[date] = Field(None, description="Date when listing was posted")
-    photo_count: Optional[int] = Field(None, description="Number of photos")
-    url: Optional[str] = Field(None, description="URL to the listing")
-    image_url: Optional[str] = Field(None, description="URL to the main image")
-    description_text: Optional[str] = Field(None, description="Listing description text")
+    rooms: int | None = Field(None, description="Number of rooms")
+    area: Decimal | None = Field(None, description="Area in square meters")
+    price_total_zl: Decimal | None = Field(None, description="Total price in PLN")
+    price_sqm_zl: Decimal | None = Field(None, description="Price per square meter in PLN")
+    price_per_sqm_detailed: Decimal | None = Field(
+        None, description="Detailed price per square meter in PLN"
+    )
+    date_posted: date | None = Field(None, description="Date when listing was posted")
+    photo_count: int | None = Field(None, description="Number of photos")
+    url: str | None = Field(None, description="URL to the listing")
+    image_url: str | None = Field(None, description="URL to the main image")
+    description_text: str | None = Field(None, description="Listing description text")
     location: LocationInfo = Field(..., description="Location information")
 
     model_config = ConfigDict(
@@ -222,7 +225,7 @@ class ListingWithLocationResponse(BaseModel):
                     "full_address": "ul. Nowy Świat 1, 00-001 Warszawa",
                     "latitude": 52.229676,
                     "longitude": 21.012229,
-                }
+                },
             }
         }
     )
@@ -230,7 +233,10 @@ class ListingWithLocationResponse(BaseModel):
 
 class FilteredListingsResponse(BaseModel):
     """Response schema for filtered listings"""
-    listings: List[ListingWithLocationResponse] = Field(..., description="List of matching listings")
+
+    listings: list[ListingWithLocationResponse] = Field(
+        ..., description="List of matching listings"
+    )
     total: int = Field(..., description="Total number of matching listings")
 
     model_config = ConfigDict(
@@ -258,11 +264,10 @@ class FilteredListingsResponse(BaseModel):
                             "full_address": "ul. Nowy Świat 1, 00-001 Warszawa",
                             "latitude": 52.229676,
                             "longitude": 21.012229,
-                        }
+                        },
                     }
                 ],
-                "total": 1
+                "total": 1,
             }
         }
     )
-

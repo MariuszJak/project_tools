@@ -1,14 +1,16 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from models.database import engine
-from routers import health, hello, location, filters
+from routers import filters, health, hello, location
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Create tables if they don't exist
     from models.base import Base
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
@@ -39,4 +41,3 @@ async def root() -> dict:
         "docs": "/docs",
         "health": "/health",
     }
-

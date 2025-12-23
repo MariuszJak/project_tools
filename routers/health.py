@@ -1,9 +1,9 @@
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.database import get_db
 from schemas.health import HealthResponse, HealthStatus
@@ -17,12 +17,10 @@ router = APIRouter(prefix="/health")
     summary="Health check endpoint",
     description="Check if the API and database are working properly",
 )
-async def health_check(
-    db: Annotated[AsyncSession, Depends(get_db)]
-) -> HealthResponse:
+async def health_check(db: Annotated[AsyncSession, Depends(get_db)]) -> HealthResponse:
     """
     Endpoint to verify the API and database are working properly.
-    
+
     Returns:
     - status: "healthy" if everything is working, "unhealthy" otherwise
     - timestamp: timestamp of the check
@@ -37,10 +35,9 @@ async def health_check(
     except Exception as e:
         database_status = f"error: {str(e)}"
         overall_status = HealthStatus.unhealthy
-    
+
     return HealthResponse(
         status=overall_status,
         timestamp=datetime.now(UTC),
         database=database_status,
     )
-

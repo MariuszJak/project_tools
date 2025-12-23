@@ -6,21 +6,17 @@ This module provides shared test fixtures for:
 - FastAPI test client
 - Database session management
 """
+
+from collections.abc import AsyncGenerator
+
 import pytest
-import asyncio
-from typing import AsyncGenerator
-from pathlib import Path
-import tempfile
-import os
-
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
-from httpx import AsyncClient, ASGITransport
 
+from main import app
 from models.base import Base
 from models.database import get_db
-from main import app
-
 
 # Test database URL - using in-memory SQLite for faster tests
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -38,13 +34,13 @@ async def test_engine():
         poolclass=StaticPool,
         echo=False,  # Set to True for SQL query debugging
     )
-    
+
     # Create all tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     # Cleanup
     await engine.dispose()
 
@@ -60,7 +56,7 @@ async def test_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
         class_=AsyncSession,
         expire_on_commit=False,
     )
-    
+
     async with async_session_maker() as session:
         yield session
         await session.rollback()
@@ -77,7 +73,7 @@ async def test_session_with_commit(test_engine) -> AsyncGenerator[AsyncSession, 
         class_=AsyncSession,
         expire_on_commit=False,
     )
-    
+
     async with async_session_maker() as session:
         yield session
         await session.commit()
@@ -89,9 +85,10 @@ def override_get_db(test_session):
     Override the get_db dependency to use the test session.
     This allows tests to use the FastAPI dependency injection system.
     """
+
     async def _get_test_db() -> AsyncGenerator[AsyncSession, None]:
         yield test_session
-    
+
     return _get_test_db
 
 
@@ -102,11 +99,11 @@ async def test_client(override_get_db) -> AsyncGenerator[AsyncClient, None]:
     Use this for testing API endpoints.
     """
     app.dependency_overrides[get_db] = override_get_db
-    
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
-    
+
     # Cleanup: remove dependency override after test
     app.dependency_overrides.clear()
 
@@ -145,7 +142,6 @@ def mock_db_offer():
         "url": "https://example.com/listing/1",
         "image_url": "https://example.com/images/1.jpg",
         "description_text": "Beautiful apartment in city center with modern amenities",
-        
         # Location fields
         "location": {
             "location_id": 1,
@@ -157,7 +153,6 @@ def mock_db_offer():
             "latitude": 52.229676,
             "longitude": 21.012229,
         },
-        
         # Building fields
         "building": {
             "building_id": 1,
@@ -165,7 +160,6 @@ def mock_db_offer():
             "building_type": "blok",
             "floor": 5,
         },
-        
         # Owner fields
         "owner": {
             "owner_id": 1,
@@ -174,7 +168,6 @@ def mock_db_offer():
             "contact_phone": "+48123456789",
             "contact_email": "jan.kowalski@example.com",
         },
-        
         # Features fields
         "features": {
             "features_id": 1,
@@ -186,4 +179,3 @@ def mock_db_offer():
             "equipment": "Wyposażenie: kuchenka, lodówka, piekarnik, pralka, zmywarka",
         },
     }
-
